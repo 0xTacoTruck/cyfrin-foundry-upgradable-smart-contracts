@@ -9,7 +9,8 @@ remappings = [
 "forge-std/=lib/forge-std/src/",
 "@chainlink/contracts/=lib/chainlink-brownie-contracts/contracts/",
 "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
-"@solmate/=lib/solmate/src/"
+"@solmate/=lib/solmate/src/",
+"@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/"
 ]
 
 #Force foundry to use the remappings in the foundry.toml file or remappings.txt

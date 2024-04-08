@@ -1,14 +1,14 @@
-# Upgradable Smart Contracts Lesson Notes
+# upgradeable Smart Contracts Lesson Notes
 
 ## Lesson and Project Overview
 
-This lesosn looks to explore what upgradable smart contracts are, proxies, how they are carried out, what are the components that allow upgradable smart contracts, their advantages and risks, best practises, how to deploy one and how to upgrade a smart contract.
+This lesosn looks to explore what upgradeable smart contracts are, proxies, how they are carried out, what are the components that allow upgradeable smart contracts, their advantages and risks, best practises, how to deploy one and how to upgrade a smart contract.
 
-## Upgradable Smart Contracts Introduction
+## upgradeable Smart Contracts Introduction
 
-We understand and have explored before how smart contracts on the ethereum blockchain are immutable and and transactions are verifiable which really boosts the security and decentralisation aspects of why this technology is so cool! However, this isn't the full story. Obviously the storage variables that a smart contract uses and are stored on the blockchain can be changed in value, the immutability reference comes from the idea that the core functioning and logic of a smart contract don't change. Now while the smart contract deployed at an address are immutable in that sense, there are actually methods that can be used to update smart contracts functionality post deployment on the blockchain - this is a concept called Upgradable Smart Contracts.
+We understand and have explored before how smart contracts on the ethereum blockchain are immutable and and transactions are verifiable which really boosts the security and decentralisation aspects of why this technology is so cool! However, this isn't the full story. Obviously the storage variables that a smart contract uses and are stored on the blockchain can be changed in value, the immutability reference comes from the idea that the core functioning and logic of a smart contract don't change. Now while the smart contract deployed at an address are immutable in that sense, there are actually methods that can be used to update smart contracts functionality post deployment on the blockchain - this is a concept called upgradeable Smart Contracts.
 
-Because of this ability to upgrade functionality of smart contracts, and often leaning away from decentralisation towards centralisation that allows small groups of individuals to make changes, the industry has, for the most part, made the determination that for the most part upgradable contracts are bad. However, they do exist and are used and therefore we need to learn about them, especially for my security journey.
+Because of this ability to upgrade functionality of smart contracts, and often leaning away from decentralisation towards centralisation that allows small groups of individuals to make changes, the industry has, for the most part, made the determination that for the most part upgradeable contracts are bad. However, they do exist and are used and therefore we need to learn about them, especially for my security journey.
 
 ### 3 Methods to Upgrade your Smart Contract
 
@@ -27,8 +27,8 @@ Because of this ability to upgrade functionality of smart contracts, and often l
     - Need to move the state of the old contract to the new upgraded one
 3. Proxies
    1. Metamorphic proxies
-   2. Transparent upgradable proxies
-   3. Universal upgradable proxies
+   2. Transparent upgradeable proxies
+   3. Universal upgradeable proxies
    4. Diamon Proxies
 
 ## Proxy Deep-Dive
@@ -76,7 +76,7 @@ Two biggest issues are:
     ![Function Selector Clash](notes_img/function-selector-clash-demo.PNG)
 
 
-### Transparent Proxy Pattern - Upgradable Proxies Methodology
+### Transparent Proxy Pattern - upgradeable Proxies Methodology
 
 This methodology looks to restrict some of the concerns around the potential issues disucussed earlier.
 
@@ -84,7 +84,7 @@ In this methodology, admins are ONLY allowed to admin functions in the proxy and
 
 This approaches limits the chance of either of these two groups swapping roles and having function selector clashes and running into huge issues of calling functions you shouldn't have
 
-### Universal Upgradable Proxies - UUPS
+### Universal upgradeable Proxies - UUPS
 
 This methodology sees the Admin Only Upgrade functions in the implementation contracts instead of the proxy contract - all upgrade logic/functions in the implementation contract itself. 
 
@@ -92,11 +92,11 @@ This way if there is clashing of function selectors, solidity won't actually com
 
 This can also provide some gas savings because we have 1 less read we have to do to check if a user is an admin or not in the proxy contract. It also means that the proxy is a little bit smaller in size because of it.
 
-The biggest issue with this is if you deploy an upgradable contract with any upgradable logic in it - YOU ARE STUCK and its back to social migration.
+The biggest issue with this is if you deploy an upgradeable contract with any upgradeable logic in it - YOU ARE STUCK and its back to social migration.
 
 ### Diamond Pattern Proxies
 
-The Diamond Pattern, also known as the "Diamond Standard" or "Diamond Proxy," is a smart contract architecture designed for upgradable contracts. It involves using proxy contracts to separate concerns, allowing different parts of the contract to be upgraded independently. These proxies are typically structured in a diamond shape, hence the name. Each facet of the diamond represents a separate logic contract, and the proxy routes function calls to the appropriate logic contract.
+The Diamond Pattern, also known as the "Diamond Standard" or "Diamond Proxy," is a smart contract architecture designed for upgradeable contracts. It involves using proxy contracts to separate concerns, allowing different parts of the contract to be upgraded independently. These proxies are typically structured in a diamond shape, hence the name. Each facet of the diamond represents a separate logic contract, and the proxy routes function calls to the appropriate logic contract.
 
 Allows multiple implmentation contracts to be used.
 
@@ -185,9 +185,9 @@ We can see that we do not get what we expected in the variables after calling th
 
 We can also see the 'value' variable is completely wrong too and should be zero because we didnt send any Ether in our transaction!
 
-This is why proxies present such risks and why we must ensure and confirm over and over again that we do not have mismatching storage slots and that we only ever append storage slots in upgradable contracts!
+This is why proxies present such risks and why we must ensure and confirm over and over again that we do not have mismatching storage slots and that we only ever append storage slots in upgradeable contracts!
 
-## Overview of the EIP-1967
+## Overview of the EIP-1967 / ERC-1967
 
 EIP-1967 led to ERC-1967: Proxy Storage Slots.
 
@@ -220,6 +220,77 @@ The SmallProxy.sol file contains plenty of comments and some very basic code to 
 
 If there is a function signature clash between the proxy and the implementation contract and we have automated our fallback to use delegate call, or we have our normal delegatecall - the function of the implementationi contract WILL NEVER BE CALLED - the delegatecall will call the function with the matching signature in the same contract.
 
-## OpenZeppelin Universal Upgradable Proxy Standard (UUPS)
+## OpenZeppelin Universal upgradeable Proxy Standard (UUPS)
+
+As we have seen throughout all the lesson in Cyfrin, OpenZeppelin provide a lot of useful tempalted solutions we can leverage - from having ERC20 contracts, through to UUPS contracts, libraries and interfaces.
+
+What's important to again note is that in this methodology, the logic to handle upgradability is included in the implementation contract itself and not stored solely in the proxy.
+
+You can plenty of useful files in both the standard 'openzeppelin-contracts' & 'openzeppelin-contracts-upgradeable' repositories in GitHub, often seeing double ups of some of the files.
+
+For this lesson we will utilise both repositories for the experience and so that we can see how they differ.
+
+### Looking into the OpenZeppelin UUPSUpgradeable.sol abstract contract
+
+The first thing to note about this contract is that it is an abstract contract, which means that it expects any child contracts that use this abstract contract define the same functions that are outlined in the abstract. As we mentioned in previous lessons, this can be a very useful way of guiding development if we first specify what functions we are expected to have in our project in an abstract so that we know what we need to do.
+
+The UUPSUpgradeable.sol file lays out the functions required as per EIPs and standards generated. Which includes importing other contracts that have functions on handling upgrades and checks and a whole bunch of other stuff - the main one being the updating of the implementation address.
+
+This lesson utilised the version 4.X.X of the OpenZeppelin/openzeppelin-contracts-upgradeable, however, I am using version 5 and therefore there are some things to explain differences of. In the version that is used in the video material of this lesson, at the bottom of the UUPSUpgradeable contract, there is a 'uint256[50] private __gap' variable - this was done so that there was a variable that would say 'hey, for upgradeable stuff in the future, save - in this case - 50 storage slots, don't touch them. This integer value could be changed to whatever was desired, but this is what was proposed. However, in version 5 of the repo, they have moved away from this and heading into EIP-7201 - Namespaced Storage Layout. 
+
+This is like ERC-1967 that we mentioned earlier with hashing a storage location, EIP-7201 defines a namespaced storage layout to prevent storage collisions for modular contracts. The EIP defines the @custom:storage-location NatSpec annotation that should annotate the storage struct in a contract.
+
+The followin is extracted from the [EIP7201](https://eips.ethereum.org/EIPS/eip-7201)
+
+```
+Formula
+
+The formula identified by erc7201 is defined as erc7201(id: string) = keccak256(keccak256(id) - 1) & ~0xff. In Solidity, this corresponds to the expression keccak256(abi.encode(uint256(keccak256(id)) - 1)) & ~bytes32(uint256(0xff)). When using this formula the annotation becomes @custom:storage-location erc7201:<NAMESPACE_ID>. For example, @custom:storage-location erc7201:foobar annotates a namespace with id "foobar" rooted at erc7201("foobar")
 
 
+(Note: The Solidity compiler includes this annotation in the AST since v0.8.20, so this is recommended as the minimum compiler version when using this pattern.)
+```
+This proposed standard suggests that for upgradeable contracts, using named spacing can greatly avoid storage collisions and suggests wrapping storage variables in a struct.
+
+```
+contract MyContract {
+  // 1) 2) and 3)
+  /// @custom:storage-location erc7201:openzeppelin.storage.MyContract
+  struct MyContractStorage {
+    uint256 x;
+  }
+
+  // 4)
+  // keccak256(abi.encode(uint256(keccak256("openzeppelin.storage.MyContract")) - 1)) & ~bytes32(uint256(0xff))
+  bytes32 MY_CONTRACT_STORAGE_LOCATION = 0x39a23e8607d7306e7523a088572477d066e708824f79fb6d8838d6f8bddff400;
+
+  // 5)
+  function _getMyContractStorage() private pure returns (MyContractStorage storage $) {
+      assembly {
+          $.slot := MY_CONTRACT_STORAGE_LOCATION
+      }
+  }
+}
+```
+### Why do we use initialiser in the UUPS Demo contracts - BoxV1UUPSDemo.sol
+
+The following is taken from the Open Zeppelin - Initializable.sol - Initializable abstract contract:
+
+```
+@dev This is a base contract to aid in writing upgradeable contracts, or any kind of contract that will be deployed
+ * behind a proxy. Since proxied contracts do not make use of a constructor, it's common to move constructor logic to an
+ * external initializer function, usually called `initialize`. It then becomes necessary to protect this initializer
+ * function so it can only be called once. The {initializer} modifier provided by this contract will have this effect.
+ *
+ * The initialization functions use a version number. Once a version number is used, it is consumed and cannot be
+ * reused. This mechanism prevents re-execution of each "step" but allows the creation of new initialization steps in
+ * case an upgrade adds a module that needs to be initialized
+```
+
+As stated, proxy contracts do not use constructors so instead they will look for external ways of executing constructor likenactivities - or initialising activities - if required. The reason they don't have one is due to the desing of them and the mis-match that can happen with storage slots.
+
+Looking through all the Open Zeppelin UUPSUpgradeable.sol, Initializable.sol and OwnableUpgradeable.sol - THEY ALL USE THIS NAMED SPACE STORAGE LOCATION LOGIC DETAILED IN EIP7201.
+
+## Final Notes of This Lesson
+
+We moved fairly quickly through this lesson and these notes are from what you need to be an expert on this topic. I highly encourage you to read through all the solidty files of this project because of the comments that I have placed in them. The comments will really help in understanding the practical aspect of this topic and will help link the theoretical stuff we talked about in this lesson of upgradeable contracts to how we actually do it with solidity and Foundry - including some very very basic tests to show our upgrade worked.
